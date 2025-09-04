@@ -15,9 +15,6 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/login/<provider>")
 def oauth_login(provider: str):
-    """
-    Перенаправляет на страницу авторизации провайдера.
-    """
     client = oauth.create_client(provider)
     if not client:
         flash("OAuth provider not configured.", "danger")
@@ -43,13 +40,11 @@ def oauth_callback(provider: str):
         flash("Не удалось получить токен от провайдера.", "danger")
         return redirect(url_for("main.login"))
 
-    # Запрос userinfo (у Authlib есть helper get / userinfo)
-    # Универсально: попробуем /userinfo или тот endpoint, что указан в регистрации
+
     try:
         resp = client.get("userinfo")  # для google
         user_info = resp.json()
     except Exception:
-        # Попробовать явный userinfo endpoint (например для Yandex)
         resp = client.get("https://login.yandex.ru/info")
         user_info = resp.json()
 
