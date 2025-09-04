@@ -50,7 +50,7 @@ def oauth_callback(provider: str):
         user_info = resp.json()
     except Exception:
         # Попробовать явный userinfo endpoint (например для Yandex)
-        resp = client.get(client.userinfo_endpoint or "info")
+        resp = client.get("https://login.yandex.ru/info")
         user_info = resp.json()
 
     email = user_info.get("email") or user_info.get("default_email")
