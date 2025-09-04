@@ -26,7 +26,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False, nullable=False)  # ← новое поле
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)  
     oauth_provider = db.Column(db.String(50), nullable=True)
     oauth_id = db.Column(db.String(200), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -58,20 +58,20 @@ class User(db.Model, UserMixin):
 
 
 class Question(db.Model):
-    """Модель вопроса."""
+    
 
     __tablename__ = "questions"
 
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text, nullable=False)
-    question_type = db.Column(db.String(20), nullable=False)  # multiple_choice, open, ordering
+    question_type = db.Column(db.String(20), nullable=False)  
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     answers = db.relationship("Answer", backref="question", cascade="all, delete-orphan", lazy="select")
 
 
 class Answer(db.Model):
-    """Модель варианта ответа (для вопросов с вариантами / порядка)."""
+   
 
     __tablename__ = "answers"
 
@@ -83,7 +83,7 @@ class Answer(db.Model):
 
 
 class QuizSession(db.Model):
-    """Одна попытка (сессия) прохождения экзамена пользователем."""
+    
 
     __tablename__ = "quiz_sessions"
 
@@ -101,7 +101,7 @@ class QuizSession(db.Model):
 
 
 class UserAnswer(db.Model):
-    """Ответ пользователя в рамках QuizSession."""
+
 
     __tablename__ = "user_answers"
 
@@ -127,7 +127,7 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    file_path = db.Column(db.String(300), nullable=True)  # путь относительно static/
+    file_path = db.Column(db.String(300), nullable=True)  
     created_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
