@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Демоэкзамен — выполнение{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Демоэкзамен — выполнение</h4>
+        <div class="text-end">
+          <div class="small text-muted">Экзамен: <strong>{{ exam_type|upper }}</strong></div>
+          <div><strong>Оставшееся время:</strong> <span id="timer">--:--</span></div>
+        </div>
+      </div>
+
+      <div class="progress mb-3" style="height:10px;">
+        <div id="timerProgress" class="progress-bar bg-success" role="progressbar" style="width:100%"></div>
+      </div>
+
+      <form id="demoForm" method="POST" autocomplete="off">
+        {{ form.hidden_tag() }}
+        <div class="mb-4">
+          <h5>Вопрос 1</h5>
+          <p><strong>{{ q1.question }}</strong></p>
+          {{ form.answer1(rows=8, class="form-control", id="answer1") }}
+        </div>
+
+        <div class="mb-4">
+          <h5>Вопрос 2</h5>
+          <p><strong>{{ q2.question }}</strong></p>
+          {{ form.answer2(rows=8, class="form-control", id="answer2") }}
+        </div>
+
+        <div class="d-flex gap-2">
+          <button id="submitBtn" type="submit" class="btn btn-success">{{ form.submit.label.text }}</button>
+          <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary" id="cancelBtn">Отмена</a>
+        </div>
+      </form>
+
+    </div>
+    <div class="card-footer small text-muted">
+      Время ограничено — 45 минут. Ваши ответы частично сохраняются локально.
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== параметры (передаёт сервер) =====
+   remaining — целое число секунд оставшегося времени
+   уникальный ключ для localStorage — используем session id или demo_exam.start_ts, передай server_key в контекст, если есть
+*/
+let remaining = {{ remaining|int }};
+const TOTAL = 45 * 60; // визуально не нужно, но можно
+const timerEl = document.getElementById('timer');
+const progressEl = document.getElementById('timerProgress');
+const form = document.getElementById('demoForm');
+const submitBtn = document.getElementById('submitBtn');
+const answer1El = document.getElementById('answer1');
+const answer2El = document.getElementById('answer2');
+
+// ключ локального сохранения — если есть session key, лучше передать; иначе используем exam_type + 'demo'
+const STORAGE_KEY = 'demo_exam_{{ session["demo_exam"]["start_ts"] if session.get("demo_exam") else "local" }}';
+
+// формат времени mm:ss
+function formatTime(sec) {
+  const m = Math.floor(sec / 60).toString().padStart(2, '0');
+  const s = Math.floor(sec % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function updateTimerUI() {
+  timerEl.textContent = formatTime(remaining);
+  const pct = Math.max(0, (remaining / (45*60)) * 100);
+  progressEl.style.width = pct + '%';
+}
+
+// таймер обратного отсчёта
+let interval = setInterval(() => {
+  remaining -= 1;
+  if (remaining <= 0) {
+    clearInterval(interval);
+    updateTimerUI();
+    // автосабмит формы (если есть данные)
+    try {
+      // выключим предупреждение beforeunload (т.к. мы инициируем навигацию)
+      window.onbeforeunload = null;
+      form.submit();
+    } catch (e) {
+      console.error(e);
+    }
+    return;
+  }
+  updateTimerUI();
+}, 1000);
+
+updateTimerUI();
+
+// Предупреждение при уходе со страницы (если есть несохранённые данные)
+let isSubmitting = false;
+window.onbeforeunload = function (e) {
+  if (isSubmitting) return;
+  // проверим есть ли текст в полях
+  if ((answer1El && answer1El.value.trim() !== '') || (answer2El && answer2El.value.trim() !== '')) {
+    const confirmationMessage = 'Вы действительно хотите покинуть страницу? Введённые ответы могут не сохраниться.';
+    e.returnValue = confirmationMessage;
+    return confirmationMessage;
+  }
+};
+
+// предотвратить двойную отправку
+form.addEventListener('submit', function (e) {
+  if (isSubmitting) {
+    e.preventDefault();
+    return;
+  }
+  isSubmitting = true;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Отправка...';
+  // снять предупреждение beforeunload
+  window.onbeforeunload = null;
+});
+
+// Автосохранение в localStorage каждые 5 сек
+function saveToLocal() {
+  const payload = {
+    answer1: answer1El ? answer1El.value : '',
+    answer2: answer2El ? answer2El.value : '',
+    ts: Date.now(),
+    remaining: remaining
+  };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch (e) {
+    console.warn('localStorage save failed', e);
+  }
+}
+
+function restoreFromLocal() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const obj = JSON.parse(raw);
+    if (obj.answer1 && answer1El) answer1El.value = obj.answer1;
+    if (obj.answer2 && answer2El) answer2El.value = obj.answer2;
+    // если remaining на клиенте больше чем сохранённый, не менять — серверное значение при перезагрузке важнее
+  } catch (e) {
+    console.warn('localStorage restore failed', e);
+  }
+}
+
+// восстанавливаем при загрузке
+restoreFromLocal();
+const autosaveInterval = setInterval(saveToLocal, 5000);
+
+// при успешной отправке можно очистить localStorage (если отправка прошла)
+document.addEventListener('visibilitychange', () => {
+  // не очищаем здесь — очистить лучше после подтверждённой успешной отправки от сервера
+});
+
+// опционально: очистить localStorage, если пользователь нажал кнопку отмены (возврат на главную)
+document.getElementById('cancelBtn').addEventListener('click', () => {
+  // не удаляем автоматически, но можно:
+  // localStorage.removeItem(STORAGE_KEY);
+});
+
+</script>
+{% endblock %}
+

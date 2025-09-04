@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Пользователи — Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Зарегистрированные пользователи</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Имя</th>
+        <th>Email</th>
+        <th>Админ</th>
+        <th>Дата</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.username }}</td>
+        <td>{{ u.email }}</td>
+        <td>{% if u.is_admin %}✔{% endif %}</td>
+        <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

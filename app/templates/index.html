@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Главная — Exam Trainer{% endblock %}
+
+{% block content %}
+<style>
+/* Встроенные стили: плашка светлая, но чуть затемнённая, текст контрастный */
+.welcome-box {
+  position: relative;
+  background: rgba(255,255,255,0.96); /* чуть не чисто белая */
+  color: #0b1320;                       /* тёмный текст для контраста */
+  padding: 2.25rem;
+  border-radius: 12px;
+  box-shadow: 0 14px 36px rgba(8,15,25,0.12);
+  max-width: 920px;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(11,19,32,0.06);
+}
+
+/* Тонкий внутренний слой — слегка затемняет плашку */
+.welcome-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.04); /* подбирай 0.03..0.08 по вкусу */
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Контент плашки поверх слоя ::before */
+.welcome-box > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Заголовок/подзаголовок — чуть усиленный контраст */
+.welcome-box h1.display-5 {
+  color: #071224;
+  letter-spacing: 0.2px;
+  margin-bottom: 0.75rem;
+}
+
+.welcome-box .lead {
+  color: #233140;
+  opacity: 0.95;
+}
+
+/* Кнопки — поверх всех слоёв */
+.welcome-box .btn {
+  position: relative;
+  z-index: 2;
+}
+
+/* Опционально: размытие фонового изображения под плашкой (если поддерживается) */
+@supports ((-webkit-backdrop-filter: blur(5px)) or (backdrop-filter: blur(5px))) {
+  .welcome-box {
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+}
+</style>
+
+<!-- Hero секция -->
+<div class="hero-bg" 
+     style="background-image: url('{{ url_for('static', filename='images/cat_prog.jpg') }}'); 
+            background-size: cover; 
+            background-position: center; 
+            background-attachment: fixed; 
+            min-height: 100vh; 
+            position: relative;">
+
+  <!-- затемнение фонового изображения (оставил как было) -->
+  <div class="hero-overlay" style="background: rgba(0,0,0,0.45); position: absolute; top:0; left:0; right:0; bottom:0;"></div>
+
+  <div class="container hero-content d-flex align-items-center justify-content-center" style="min-height: 100vh; position: relative; z-index: 1;">
+    <!-- убран text-white, цвет текста задаётся в стилях выше -->
+    <div class="welcome-box text-center">
+      <h1 class="display-5 fw-bold mb-3">Добро пожаловать в Exam Trainer</h1>
+      <p class="lead mb-4">Тренажёр для подготовки к экзаменам по Фундаментальной информатике и АИСД</p>
+
+      <div class="d-flex justify-content-center gap-2 flex-wrap">
+        <a href="{{ url_for('main.list_questions') }}" class="btn btn-primary btn-lg">Список вопросов</a>
+        <a href="{{ url_for('main.demo_exam_start') }}" class="btn btn-success btn-lg">Демоэкзамен</a>
+        <a href="{{ url_for('main.tasks') }}" class="btn btn-warning btn-lg">Задачи</a>
+      </div>
+
+      <p class="small mt-3">Удачной подготовки 😉</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+  

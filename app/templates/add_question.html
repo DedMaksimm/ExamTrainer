@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h2>Добавление вопроса</h2>
+    <form method="POST">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        {{ form.text.label(class="form-label") }}
+        {{ form.text(class="form-control", rows="3") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.question_type.label(class="form-label") }}
+        {{ form.question_type(class="form-select") }}
+      </div>
+
+      <h4 class="mt-4">Ответы</h4>
+      {% for subform in form.answers %}
+        <div class="card mb-3 p-3">
+          <div class="mb-2">
+            {{ subform.text.label(class="form-label") }}
+            {{ subform.text(class="form-control") }}
+          </div>
+          <div class="form-check mb-2">
+            {{ subform.is_correct(class="form-check-input") }}
+            {{ subform.is_correct.label(class="form-check-label") }}
+          </div>
+          <div class="mb-2">
+            {{ subform.order.label(class="form-label") }}
+            {{ subform.order(class="form-control") }}
+          </div>
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Список вопросов</h2>
+  <ul>
+    <li><a href="{{ url_for('informatics_questions') }}">Вопросы к экзамену по Фундаментальной информатике</a></li>
+    <li><a href="{{ url_for('algorithms_questions') }}">Вопросы к экзамену по Алгоритмам и структурам данных</a></li>
+  </ul>
+</div>
+{% endblock %}

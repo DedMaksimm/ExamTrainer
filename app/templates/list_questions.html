@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Список вопросов</h2>
+
+  <!-- Кнопка перехода к вопросам к экзамену -->
+  <a href="{{ url_for('main.exam_questions') }}" class="btn btn-primary mb-3">
+    Вопросы к экзамену
+  </a>
+
+  <a href="{{ url_for('main.add_question') }}" class="btn btn-success mb-3">Добавить вопрос</a>
+
+  {% for q in questions %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{{ q.text }}</h5>
+        <p><strong>Тип:</strong> {{ q.question_type }}</p>
+        <ul>
+          {% for a in q.answers %}
+            <li>
+              {{ a.text }}
+              {% if a.is_correct %}<strong> ✔</strong>{% endif %}
+              {% if a.order is not none %} (порядок: {{ a.order }}){% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% else %}
+    <p>Приготовьтесь увидеть вопросы самого сложного экзамена 1 курса.</p>
+  {% endfor %}
+</div>
+{% endblock %}

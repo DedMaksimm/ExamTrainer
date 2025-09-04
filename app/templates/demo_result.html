@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Результат демоэкзамена</h2>
+  <p>Экзамен: <strong>{{ session.exam_type|upper }}</strong></p>
+  <p>Начало: {{ session.started_at }} | Отправлено: {{ session.submitted_at }}</p>
+
+  <div class="mt-4">
+    {% for a in answers %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Вопрос {{ loop.index }}: {{ a.question_text }}</h5>
+          <p class="mb-1"><strong>Ваш ответ:</strong></p>
+          <div class="border rounded p-2 mb-2">{{ a.user_answer_text }}</div>
+          <p class="mb-1"><strong>Правильный ответ:</strong></p>
+          <div class="border rounded p-2 text-success">{{ a.correct_answer_text or '—' }}</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <a class="btn btn-secondary" href="{{ url_for('main.profile') }}">Назад в профиль</a>
+</div>
+{% endblock %}

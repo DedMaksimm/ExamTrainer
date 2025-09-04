@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Задачи — Exam Trainer{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Задачи</h2>
+    {% if current_user.is_admin %}
+      <a href="{{ url_for('main.add_task') }}" class="btn btn-sm btn-primary">Добавить задачу</a>
+    {% endif %}
+  </div>
+
+  {% if tasks %}
+    <div class="row g-3">
+      {% for t in tasks %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100">
+            {% if t.file_path %}
+              <a href="{{ url_for('static', filename=t.file_path) }}" target="_blank">
+                <img src="{{ url_for('static', filename=t.file_path) }}" class="card-img-top" alt="{{ t.title }}" style="object-fit: cover; height: 220px;">
+              </a>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ t.title }}</h5>
+              {% if t.description %}
+                <p class="card-text text-muted" style="flex: 1;">{{ t.description }}</p>
+              {% endif %}
+              <p class="text-muted small mb-2">Добавлено: {{ t.created_at.strftime('%Y-%m-%d %H:%M') }}{% if t.creator %} — {{ t.creator.username }}{% endif %}</p>
+
+              <div class="mt-auto d-flex gap-2">
+                <a href="{{ url_for('static', filename=t.file_path) }}" target="_blank" class="btn btn-outline-secondary btn-sm">Открыть ответ</a>
+
+                {% if current_user.is_admin %}
+                  <form method="post" action="{{ url_for('main.delete_task', task_id=t.id) }}" onsubmit="return confirm('Удалить задачу?');">
+                    <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>Задач пока нет.</p>
+  {% endif %}
+</div>
+{% endblock %}
+

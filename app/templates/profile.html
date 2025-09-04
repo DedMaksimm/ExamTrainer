@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Профиль: {{ user.username }}</h2>
+  <p class="text-muted">Email: {{ user.email }}</p>
+
+  <h4 class="mt-4">История демоэкзаменов</h4>
+  {% if sessions %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Дата</th>
+          <th>Экзамен</th>
+          <th>Длительность (сек)</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in sessions %}
+          <tr>
+            <td>{{ s.started_at }}</td>
+            <td>{{ s.exam_type|upper }}</td>
+            <td>{{ s.duration_seconds }}</td>
+            <td>
+              <a class="btn btn-sm btn-primary" href="{{ url_for('main.demo_exam_result', session_id=s.id) }}">Посмотреть</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Пока попыток нет.</p>
+  {% endif %}
+</div>
+{% endblock %}
+

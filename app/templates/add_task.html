@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Добавить задачу — Exam Trainer{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Добавить задачу</h2>
+  <form method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label class="form-label">Заголовок</label>
+      <input class="form-control" name="title" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Описание (опционально)</label>
+      <textarea class="form-control" name="description" rows="3"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Файл-ответ (jpg/png/pdf)</label>
+      <input type="file" name="file" class="form-control">
+    </div>
+    <button class="btn btn-success" type="submit">Добавить</button>
+    <a class="btn btn-secondary" href="{{ url_for('main.tasks') }}">Отмена</a>
+  </form>
+</div>
+{% endblock %}

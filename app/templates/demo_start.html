@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Демоэкзамен — выбор и таймер{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h1 class="h4 mb-3 text-center">Демоэкзамен</h1>
+          <p class="text-muted text-center mb-4">
+            Выберите экзамен и начните демо-экзамен. Время выполнения — <strong>45 минут</strong>.
+            В демо будут 2 вопроса: первый — из первой половины пула, второй — из второй.
+          </p>
+
+          <!-- Форма выбора экзамена -->
+          <form id="demoForm" method="POST" action="{{ url_for('main.demo_exam_start') }}">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Выберите экзамен</label>
+              {{ form.exam_type(class="form-select") }}
+            </div>
+
+            <div class="d-flex gap-2 justify-content-center">
+              <button id="prepBtn" type="button" class="btn btn-outline-primary">
+                Подготовиться
+              </button>
+              <button id="startSubmit" type="submit" class="btn btn-primary d-none">
+                Начать и перейти к экзамену
+              </button>
+            </div>
+          </form>
+
+          <!-- Таймер / подготовка (по умолчанию скрыт) -->
+          <div id="timerPanel" class="mt-4 d-none">
+            <div class="row align-items-center">
+              <div class="col-md-6 text-center">
+                <div class="mb-2 small text-muted">Оставшееся время</div>
+                <div id="timerDisplay" class="display-6 fw-bold">45:00</div>
+                <div class="small text-muted mt-1">Таймер стартует при нажатии «Подготовиться»</div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-2 small text-muted">Инструкции</div>
+                <ul class="small">
+                  <li>В демо-экзамене — 2 вопроса; ответы вводятся открыто (текстом).</li>
+                  <li>Если время истечёт — форма будет автоматически отправлена (если вы уже в процессе).</li>
+                  <li>Рекомендуется сначала подготовиться, затем сразу нажать «Начать и перейти к экзамену».</li>
+                </ul>
+
+                <div class="d-flex gap-2 mt-3">
+                  <button id="cancelPrep" type="button" class="btn btn-outline-secondary">Отменить</button>
+                  <button id="startNow" type="button" class="btn btn-success">Начать и перейти к экзамену</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Прогрессбар времени -->
+            <div class="progress mt-3" style="height: 10px;">
+              <div id="timerProgress" class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+            </div>
+          </div>
+
+        </div>
+        <div class="card-footer text-center small text-muted">
+          Длительность: <strong>45 минут</strong> • Вопросы выбираются случайно по правилам демо
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Скрипты управления таймером -->
+<script>
+(function () {
+  const DURATION = 45 * 60; // 45 минут в секундах
+  let remaining = DURATION;
+  let intervalId = null;
+  const prepBtn = document.getElementById('prepBtn');
+  const timerPanel = document.getElementById('timerPanel');
+  const timerDisplay = document.getElementById('timerDisplay');
+  const startNow = document.getElementById('startNow');
+  const cancelPrep = document.getElementById('cancelPrep');
+  const startSubmit = document.getElementById('startSubmit');
+  const timerProgress = document.getElementById('timerProgress');
+  const demoForm = document.getElementById('demoForm');
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60).toString().padStart(2, '0');
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function updateTimerUI() {
+    timerDisplay.textContent = formatTime(remaining);
+    const pct = Math.max(0, (remaining / DURATION) * 100);
+    timerProgress.style.width = pct + '%';
+    if (remaining <= 0) {
+      clearInterval(intervalId);
+      timerDisplay.textContent = '00:00';
+      // авто-отправка формы (если пользователь не начал)
+      // подпосылка формы по умолчанию — просто сабмит demoForm
+      // если startSubmit (видимая кнопка) не была нажата, отправим форму автоматически
+      demoForm.submit();
+    }
+  }
+
+  function startCountdown() {
+    // если уже запущено — не запускать снова
+    if (intervalId) return;
+    intervalId = setInterval(() => {
+      remaining -= 1;
+      updateTimerUI();
+    }, 1000);
+  }
+
+  prepBtn.addEventListener('click', () => {
+    // Показываем панель таймера и кнопку "Начать"
+    timerPanel.classList.remove('d-none');
+    // Показываем видимую кнопку сабмита (скрытая обычная submit там уже есть)
+    startSubmit.classList.remove('d-none');
+    // Начинаем обратный отсчет (локально визуально)
+    remaining = DURATION;
+    updateTimerUI();
+    startCountdown();
+    // убираем подготовительную кнопку, чтобы не дублировать
+    prepBtn.classList.add('d-none');
+  });
+
+  cancelPrep.addEventListener('click', () => {
+    // Отменяем подготовку
+    timerPanel.classList.add('d-none');
+    prepBtn.classList.remove('d-none');
+    startSubmit.classList.add('d-none');
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+    remaining = DURATION;
+    updateTimerUI();
+  });
+
+  // Нажатие "Начать и перейти к экзамену" — отправляет форму
+  startNow.addEventListener('click', () => {
+    // синхронизируем: отправляем форму
+    demoForm.submit();
+  });
+
+  // Также обеспечим, что стандартная видимая кнопка submit работает
+  startSubmit.addEventListener('click', () => {
+    // это обычный submit кнопки внутри формы
+    // (ничего дополнительно не нужно — форма отправится на сервер)
+  });
+
+  // Инициализация: покажем стартовое значение
+  updateTimerUI();
+})();
+</script>
+{% endblock %}
