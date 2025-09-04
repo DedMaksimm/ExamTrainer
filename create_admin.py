@@ -7,7 +7,7 @@ from app.models import User
 
 
 def create_admin_user(email: str, password: str | None = None, username: str | None = None) -> None:
-    """Создать пользователя-админа или обновить существующего."""
+    """Создать админа."""
     app = create_app()
     with app.app_context():
         user = User.query.filter_by(email=email).first()
@@ -15,11 +15,9 @@ def create_admin_user(email: str, password: str | None = None, username: str | N
         if user:
             user.is_admin = True
             if password:
-                # Используем метод модели, если он есть
                 try:
                     user.set_password(password)
                 except Exception:
-                    # Назначаем хеш прямо, если метода нет
                     from werkzeug.security import generate_password_hash
                     user.password_hash = generate_password_hash(password)
             db.session.add(user)
@@ -29,7 +27,7 @@ def create_admin_user(email: str, password: str | None = None, username: str | N
                 print('Пароль обновлён.')
             return
 
-        # если пользователя нет — создаём нового
+        
         if not username:
             username = email.split('@')[0]
 
@@ -41,7 +39,6 @@ def create_admin_user(email: str, password: str | None = None, username: str | N
                 from werkzeug.security import generate_password_hash
                 new_user.password_hash = generate_password_hash(password)
         else:
-            # попросим пароль интерактивно
             pw = getpass.getpass('Введите пароль для нового администратора: ')
             if not pw:
                 print('Пароль не введён. Отмена.')
