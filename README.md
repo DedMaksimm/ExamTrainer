@@ -1,93 +1,114 @@
 # ExamTrainer
 
-> **A lightweight exam preparation trainer built with Flask** — supports local registration and OAuth sign-in (Google and Yandex). Copy the contents below into your project's `README.md`.
+## 🚀 Краткое описание
+
+ExamTrainer — веб‑приложение на Flask, позволяющее готовиться к экзаменам: создавать аккаунты, тренироваться, входить через Google и Yandex. Проект спроектирован как стартовая база: понятная структура, Flask Blueprints, SQLAlchemy и поддержка миграций.
 
 ---
 
-## 🚀 Features
+## ✨ Возможности веб‑приложения
 
-* Email/password registration and login
-* OAuth login (Google, Yandex)
-* SQLAlchemy ORM + Flask-Migrate for database management
-* Simple blueprint-based structure (`main`, `auth`)
+* Регистрация и вход по email/паролю
+* Вход через OAuth (Google, Yandex)
+* Управление пользователями (создание, поиск, авторизация)
+* Хранение данных в реляционной БД (SQLAlchemy + Flask‑Migrate)
+* Простая архитектура с blueprints (`main`, `auth`) — легко расширять
+* Лёгкая локальная настройка через `.env`
 
 ---
 
-## ⚙️ Quickstart (local development)
+## 🧰 Технологический стек
 
-Prerequisites: Python 3.10+, [Poetry](https://python-poetry.org/) (or use `pip`/venv if you prefer).
+| Слой                     | Технологии / библиотеки                                           |
+| ------------------------ | ----------------------------------------------------------------- |
+| Бэкенд                   | Python 3.10+, Flask, Flask-Login, Flask-Migrate, Flask-SQLAlchemy |
+| OAuth                    | Authlib (authlib.integrations.flask\_client)                      |
+| БД                       | SQLite (по умолчанию для разработки), поддержка PostgreSQL и т.д. |
+| Миграции                 | Flask-Migrate (Alembic)                                           |
+| Управление зависимостями | Poetry (рекомендуется)                                            |
+| Файловая структура       | Blueprints (main, auth), моделирование через SQLAlchemy           |
+
+---
+
+## 👥 Команда
+
+Даже если проект маленький, важно указать роли — у нас команда из одного человека:
+
+| Роль                | Участник        |
+| ------------------- | --------------- |
+| Team Lead           | Максимов Максим |
+| Backend             | Максимов Максим |
+| Frontend            | Максимов Максим |
+| DevOps / Deployment | Максимов Максим |
+| Дизайн / UI         | Максимов Максим |
+
+> Все роли выполняет один разработчик: ты — полный стек.
+
+---
+
+## ⚙️ Быстрая установка (локально)
+
+Требования: Python 3.10+, Poetry (или используйте venv + pip).
 
 ```bash
-# clone the repo
+# клонируем репозиторий
 git clone <REPO_URL>
 cd exam_trainer
 
-# install dependencies
+# устанавливаем зависимости
 poetry install
 
-# create .env (see example below)
-# initialize database migrations (first run only)
+# создаём файл .env (см. пример ниже)
+# инициализация миграций (только при первом запуске)
 poetry run flask db init
 poetry run flask db migrate -m "Init"
 poetry run flask db upgrade
 
-# run the app
+# запуск приложения
 poetry run flask run --host=127.0.0.1 --port=5000
-# or
+# или
 poetry run python run.py
 ```
 
-Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your browser.
+Откройте в браузере: `http://127.0.0.1:5000`
 
 ---
 
-## 🔐 Example `.env`
+## 🗂 Cтруктура проекта
 
-```.env
-SECRET_KEY=replace_with_a_strong_secret
-DATABASE_URL=sqlite:///app.db
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-YANDEX_CLIENT_ID=
-YANDEX_CLIENT_SECRET=
 ```
-
-> For production use a real database (Postgres, MySQL) and HTTPS.
+exam_trainer/
+├─ app/
+│  ├─ __init__.py
+│  ├─ extensions.py
+│  ├─ models.py
+│  ├─ routes.py
+│  └─ auth/
+│     ├─ __init__.py
+│     └─ routes.py
+├─ migrations/
+├─ .env
+├─ run.py
+├─ pyproject.toml
+└─ README.md
+```
 
 ---
 
-## 🔁 OAuth setup (Google & Yandex)
+## 🤝 Как внести вклад
 
-**Important:** The redirect URI you register in the provider console must match exactly the one produced by Flask's `url_for(..., _external=True)` (scheme, host, port and path).
-
-### Typical local redirect URIs
-
-If you run the app at `http://127.0.0.1:5000`, register these callbacks in provider settings:
-
-```
-http://127.0.0.1:5000/auth/callback/google
-http://127.0.0.1:5000/auth/callback/yandex
-```
-
-If you use `localhost` or a different port, the string must match precisely.
+1. Форкните репозиторий
+2. Создайте ветку: `git checkout -b feature/your-feature`
+3. Сделайте изменения, закоммитьте и отправьте PR
 
 ---
 
-## 🧱 Models (User)
+## 📄 Лицензия
 
-Important fields used in the app (example model):
+Moscow Aviation Institute © Максимов Максим
 
-```py
-from datetime import datetime
-from app.extensions import db
-from flask_login import UserMixin
+---
 
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), nullable=False, unique=True)
-    email = db.Column(db.String(150), nullable=False, unique=True)
-    password_hash = db.Column(db.String(128), nullable=True)  # nullable=True for OAuth users
-    is_admin = db.Column(db.Boolean, default=False)
-    oauth_provider = db.Column(db.String(50), nullable=True)
-    oauth_id = d
-```
+
+
+
